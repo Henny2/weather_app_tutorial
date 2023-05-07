@@ -6,5 +6,3 @@ import { getWeather } from "./weather"
 getWeather(12.34, 14.53, Intl.DateTimeFormat().resolvedOptions().timeZone).then(res => {
   console.log(res.data)
 })
-
-// stopped at 28:30

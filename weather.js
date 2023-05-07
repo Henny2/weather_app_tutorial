@@ -12,7 +12,27 @@ export function getWeather(lat, lon, timezone) {
 
             }
         }
-    )
+    ).then(({ data }) => {
+        return {
+            current: parseCurrentWeather(data),
+            // daily: parseDailyWeather(data),
+            // hourly: parseHourlyWeather(data),
+        }
+    })
 }
 
-// stopped at 25:40
+function parseCurrentWeather({ current_weather }) {
+    let temp = current_weather.temperature
+    let windspeed = current_weather.windspeed
+    let weathercode = current_weather.weathercode
+    console.log(temp, windspeed, weathercode)
+    return {
+        temp: temp,
+        windspeed: windspeed,
+        weathercode: weathercode,
+    }
+}
+
+function parseDailyWeather({ daily }) {
+    // need to get the day of the week from unixtime
+}
