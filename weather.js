@@ -14,6 +14,10 @@ export function getWeather(lat, lon, timezone) {
             }
         }
     ).then(({ data }) => {
+        console.log(data)
+        console.log('current parsed', parseCurrentWeather(data))
+        console.log('daily parsed', parseDailyWeather(data))
+        console.log('hourly parsed', parseHourlyWeather(data))
         return {
             current: parseCurrentWeather(data),
             daily: parseDailyWeather(data),
@@ -22,60 +26,73 @@ export function getWeather(lat, lon, timezone) {
     })
 }
 
-function parseCurrentWeather({ current_weather }) {
-    let temp = current_weather.temperature
-    let windspeed = current_weather.windspeed
-    let weathercode = current_weather.weathercode
-    console.log('current')
-    console.log(temp, windspeed, weathercode)
-    console.log('current')
-    let current_data = {
-        temp: temp,
-        windspeed: windspeed,
-        weathercode: weathercode,
+function parseCurrentWeather({ current_weather, daily }) {
+    const {
+        temperature: temp,
+        windspeed: windSpeed,
+        weathercode: iconCode }
+        = current_weather
+    // console.log('daily', daily)
+    const {
+        // this is how to deconstruct an array
+        // same as maxTemp = temperature_2m_max[0]
+        temperature_2m_max: [maxTemp],
+        temperature_2m_min: [minTemp],
+        apparent_temperature_max: [feelLikeMaxTemp],
+        apparent_temperature_min: [feelLikeMinTemp],
+        precipitation_sum: [precip]
+    } = daily
+
+    return {
+        temp,
+        windSpeed,
+        iconCode: iconCode, // could just write iconCode if its the same name for key and variable
+        precip,
+        feelLikeMaxTemp,
+        feelLikeMinTemp,
+        minTemp,
+        maxTemp
     }
-    console.log(current_data.temp)
-    return current_data
 }
 
 
 function parseDailyWeather({ daily }) {
-    // need to get the day of the week from unixtime
-    let daily_data = {}
-    const timestamps = daily.time
-    // console.log(new Date(1683478800 * 1000).toLocaleDateString('en-US', { weekday: 'long' }))
-    // console.log(timestamps)
-    for (let i = 0; i < timestamps.length; i++) {
-        let day_of_week = getDayOfTimestamp(timestamps[i])
-        // console.log(timestamps[i])
-        // console.log(day_of_week)
-        daily_data[day_of_week] = {
-            weathercode: daily.weathercode[i],
-            max_temp: daily.temperature_2m_max[i],
-            min_temp: daily.temperature_2m_min[i],
-            fl_max_temp: daily.apparent_temperature_max[i],
-            fl_min_temp: daily.apparent_temperature_min[i],
-            precip: daily.precipitation_sum[i],
+    // let daily_data = {}
+    // const timestamps = daily.time
+    // for loop works, but map() function is cleaner
+    // for (let i = 0; i < timestamps.length; i++) {
+    //     let day_of_week = getDayOfTimestamp(timestamps[i])
+    //     daily_data[day_of_week] = {
+    //         weathercode: daily.weathercode[i],
+    //         max_temp: daily.temperature_2m_max[i],
+    //         min_temp: daily.temperature_2m_min[i],
+    //         fl_max_temp: daily.apparent_temperature_max[i],
+    //         fl_min_temp: daily.apparent_temperature_min[i],
+    //         precip: daily.precipitation_sum[i],
+    //     }
+    // }
+    const { temperature_2m_max: maxTemps, weathercode: iconCodes } = daily
+    return daily.time.map((time, index) => {
+        return {
+            day: getDayOfTimestamp(time),
+            maxTemp: maxTemps[index],
+            iconCode: iconCodes[index],
         }
-    }
-    console.log(daily_data)
-    return daily_data
+    })
 }
 
-function parseHourlyWeather({ hourly }) {
-    let hourly_data = {}
-    const timestamps = hourly.time
-    for (let i = 0; i < timestamps.length; i++) {
-        let time_of_day = getFormattedHour(timestamps[i])
-        hourly_data[time_of_day] = {
-            temp: hourly.temperature_2m[i],
-            fl_temp: hourly.apparent_temperature[i],
-            windspeed: hourly.windspeed_10m[i],
-            weathercode: hourly.weathercode[i],
-            precip: hourly.precipitation[i],
+function parseHourlyWeather({ hourly, current_weather }) {
+
+    return hourly.time.map((time, index) => {
+        return {
+            timeStamp: time * 1000,
+            feelLikeTemp: hourly.apparent_temperature[index],
+            precip: hourly.precipitation[index],
+            temp: hourly.temperature_2m[index],
+            iconCode: hourly.weathercode[index],
+            windSpeed: hourly.windspeed_10m[index],
         }
-    }
-    console.log(hourly_data)
-    return hourly_data
+        // filter the hourly records that were before the current time
+    }).filter(({ timeStamp }) => timeStamp >= current_weather.time * 1000)
 }
 
