@@ -26,20 +26,20 @@ function imageMapping(weather_code) {
 
 }
 
-function setValue(selector, val) {
+function setValue(selector, val, { parent = document } = {}) {
   // console.log(`[${selector}]`)
-  document.querySelector(`[${selector}]`).textContent = val
+  parent.querySelector(`[data-${selector}]`).textContent = val
   console.log(document.querySelector(`[${selector}]`))
 }
 function renderCurrentWeather(current) {
   console.log(current)
-  setValue("data-current-temp", current.temp)
-  setValue("data-current-high", current.maxTemp)
-  setValue("data-current-fl-high", current.feelLikeMaxTemp)
-  setValue("data-current-low", current.minTemp)
-  setValue("data-current-fl-low", current.feelLikeMinTemp)
-  setValue("data-current-wind", current.windSpeed)
-  setValue("data-current-precip", current.precip)
+  setValue("current-temp", current.temp)
+  setValue("current-high", current.maxTemp)
+  setValue("current-fl-high", current.feelLikeMaxTemp)
+  setValue("current-low", current.minTemp)
+  setValue("current-fl-low", current.feelLikeMinTemp)
+  setValue("current-wind", current.windSpeed)
+  setValue("current-precip", current.precip)
 
 
 }
