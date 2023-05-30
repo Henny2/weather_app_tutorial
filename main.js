@@ -31,7 +31,14 @@ function setValue(selector, val, { parent = document } = {}) {
   parent.querySelector(`[data-${selector}]`).textContent = val
   console.log(document.querySelector(`[${selector}]`))
 }
+
+function getIconUrl() {
+
+}
+
+const currentIcon = document.querySelector("[data-current-icon]")
 function renderCurrentWeather(current) {
+  currentIcon.src = getIconUrl(current.iconCode)
   console.log(current)
   setValue("current-temp", current.temp)
   setValue("current-high", current.maxTemp)
