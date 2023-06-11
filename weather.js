@@ -74,7 +74,7 @@ function parseDailyWeather({ daily }) {
     const { temperature_2m_max: maxTemps, weathercode: iconCodes } = daily
     return daily.time.map((time, index) => {
         return {
-            day: getDayOfTimestamp(time),
+            day: getDayOfTimestamp(time * 1000),
             maxTemp: maxTemps[index],
             iconCode: iconCodes[index],
         }
