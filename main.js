@@ -1,4 +1,5 @@
 import "./style.css"
+import { ICON_MAP } from "./utils/iconMap"
 // you could also import the css within the html file via link
 import { getWeather } from "./weather"
 
@@ -12,7 +13,7 @@ getWeather(12.34, 14.53, Intl.DateTimeFormat().resolvedOptions().timeZone)
 
 function renderWeather({ current, daily, hourly }) {
   renderCurrentWeather(current)
-  // renderDailyWeather(daily)
+  renderDailyWeather(daily)
   // renderHourlyWeather(hourly)
   document.body.classList.remove("blurred")
 
@@ -32,8 +33,8 @@ function setValue(selector, val, { parent = document } = {}) {
   console.log(document.querySelector(`[${selector}]`))
 }
 
-function getIconUrl() {
-
+function getIconUrl(iconCode) {
+  return `icons/${ICON_MAP.get(iconCode)}.svg`
 }
 
 const currentIcon = document.querySelector("[data-current-icon]")
@@ -47,8 +48,27 @@ function renderCurrentWeather(current) {
   setValue("current-fl-low", current.feelLikeMinTemp)
   setValue("current-wind", current.windSpeed)
   setValue("current-precip", current.precip)
+}
 
+// getting the daily html section
+const dailySection = document.querySelector("[data-day-section]")
+// getting day teamplate
+const dayCardTemplate = document.getElementById("day-card")
+function renderDailyWeather(daily) {
+  // deleting all the hard coded day cards
+  dailySection.innerHTML = ''
+  daily.forEach(day => {
+    const element = dayCardTemplate.content.cloneNode(true)
+    setValue("temp", day.maxTemp, { parent: element })
 
+    // setValue("icon", getIconUrl(day.iconCode), { parent: element })
+    const dayIcon = element.querySelector("[data-icon]")
+    dayIcon.src = getIconUrl(day.iconCode)
+    setValue("date", day.day, { parent: element })
+    console.log(day)
+    dailySection.appendChild(element);
+  });
+  console.log(daily)
 }
 
 // work on setting all the values
